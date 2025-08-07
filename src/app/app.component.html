@@ -86,13 +86,18 @@
     </header>
 
     <main class="flex-1 overflow-y-auto p-4">
+      <app-loader></app-loader>
       @if (activeSection === 'dashboard') {
         <app-dashboard></app-dashboard>
       } @else if (activeSection === 'alerts') {
-        <app-alerts></app-alerts>
+        <!-- L'événement openModal est écouté ici -->
+        <app-alerts (openModal)="onOpenAlertModal($event)"></app-alerts>
       } @else if (activeSection === 'emailLogs') {
         <app-email-logs></app-email-logs>
       }
     </main>
   </div>
 </div>
+
+<!-- La modale est affichée conditionnellement et reçoit l'alerte sélectionnée -->
+<app-alert-detail-modal [alert]="selectedAlert" (close)="onCloseAlertModal()"></app-alert-detail-modal>

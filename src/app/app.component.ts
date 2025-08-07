@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService } from './api.service';
+import {AmlAlert, ApiService} from './api.service';
 import {EmailLogsComponent} from './email-logs/email-logs.component';
 import {AlertsComponent} from './alerts/alerts.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
 import {LoaderComponent} from './loader/loader.component';
+import {AlertDetailModalComponent} from './alert-detail-modal/alert-detail-modal.component';
 
 @Component({
   selector: 'app-root',
@@ -12,6 +13,8 @@ import {LoaderComponent} from './loader/loader.component';
     EmailLogsComponent,
     AlertsComponent,
     DashboardComponent,
+    AlertDetailModalComponent,
+    LoaderComponent,
   ],
   styleUrls: ['./app.component.css']
 })
@@ -19,6 +22,7 @@ export class AppComponent implements OnInit {
   title = 'AML Alert Dashboard';
   activeSection: string = 'dashboard';
   isSidebarOpen: boolean = false;
+  selectedAlert: AmlAlert | null = null; // Stocke l'alerte sélectionnée pour la modale
 
   constructor(private apiService: ApiService) {}
 
@@ -48,5 +52,19 @@ export class AppComponent implements OnInit {
         }
       });
     }
+  }
+
+  onOpenAlertModal(alert: AmlAlert): void {
+    this.selectedAlert = alert;
+  }
+
+  // Fonction pour fermer la modale
+  onCloseAlertModal(): void {
+    this.selectedAlert = null;
+  }
+
+  // Fonction appelée quand une alerte est mise à jour
+  onAlertUpdated(): void {
+    // La modale se ferme et le tableau sera rechargé par le composant AlertsComponent
   }
 }
