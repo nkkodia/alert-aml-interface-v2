@@ -26,6 +26,7 @@
     "@angular/forms": "^20.1.0",
     "@angular/platform-browser": "^20.1.0",
     "@angular/router": "^20.1.0",
+    "@fortawesome/fontawesome-free": "^7.0.0",
     "@tailwindcss/vite": "^4.1.11",
     "chart.js": "^4.5.0",
     "font-awesome": "^4.7.0",
