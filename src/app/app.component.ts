@@ -12,7 +12,6 @@ import {LoaderComponent} from './loader/loader.component';
     EmailLogsComponent,
     AlertsComponent,
     DashboardComponent,
-    LoaderComponent
   ],
   styleUrls: ['./app.component.css']
 })

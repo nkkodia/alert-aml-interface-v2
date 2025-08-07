@@ -86,10 +86,13 @@
     </header>
 
     <main class="flex-1 overflow-y-auto p-4">
-      <app-loader></app-loader>
-      <app-dashboard *ngIf="activeSection === 'dashboard'"></app-dashboard>
-      <app-alerts *ngIf="activeSection === 'alerts'"></app-alerts>
-      <app-email-logs *ngIf="activeSection === 'emailLogs'"></app-email-logs>
+      @if (activeSection === 'dashboard') {
+        <app-dashboard></app-dashboard>
+      } @else if (activeSection === 'alerts') {
+        <app-alerts></app-alerts>
+      } @else if (activeSection === 'emailLogs') {
+        <app-email-logs></app-email-logs>
+      }
     </main>
   </div>
 </div>

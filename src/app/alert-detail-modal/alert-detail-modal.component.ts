@@ -8,7 +8,6 @@ import {DatePipe, NgIf} from '@angular/common';
   templateUrl: './alert-detail-modal.component.html',
   imports: [
     FormsModule,
-    NgIf,
     DatePipe
   ],
   styleUrls: ['./alert-detail-modal.component.css']
@@ -20,7 +19,7 @@ export class AlertDetailModalComponent {
 
   newComment: string = '';
   selectedStatus: string = '';
-  resendRecipientEmail: string = 'admin@alertaml.com'; // Default value
+  resendRecipientEmail: string = 'admin@alertaml.com';
 
   constructor(private apiService: ApiService) { }
 
