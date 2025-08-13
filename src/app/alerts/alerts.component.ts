@@ -1,10 +1,12 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core'; // Importez Output et EventEmitter
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { ApiService, AmlAlert, Page } from '../api.service';
 import { Subscription } from 'rxjs';
-import {DatePipe} from '@angular/common';
-import {FormsModule} from '@angular/forms';
+import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-alerts',
+  standalone: true, // Ajoutez standalone: true si c'est un composant autonome
   templateUrl: './alerts.component.html',
   imports: [
     DatePipe,
@@ -13,7 +15,7 @@ import {FormsModule} from '@angular/forms';
   styleUrls: ['./alerts.component.css']
 })
 export class AlertsComponent implements OnInit {
-  @Output() openModal = new EventEmitter<AmlAlert>(); // Émet l'alerte sélectionnée
+  @Output() openModal = new EventEmitter<AmlAlert>();
 
   alerts: AmlAlert[] = [];
   currentFilters: any = { page: 0, size: 5, sortBy: 'dateAlerte', sortDir: 'desc' };
@@ -27,6 +29,12 @@ export class AlertsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAlerts();
+  }
+
+  ngOnDestroy(): void {
+    if (this.alertsSubscription) {
+      this.alertsSubscription.unsubscribe();
+    }
   }
 
   loadAlerts(): void {
@@ -92,13 +100,23 @@ export class AlertsComponent implements OnInit {
 
   getPageNumbers(): number[] {
     const pageNumbers = [];
-    for (let i = 0; i < this.totalPages; i++) {
+    const maxPagesToShow = 5;
+    const startPage = Math.max(0, this.currentPage - Math.floor(maxPagesToShow / 2));
+    const endPage = Math.min(this.totalPages - 1, startPage + maxPagesToShow - 1);
+
+    for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i + 1);
+    }
+
+    if (startPage > 0) {
+      pageNumbers.unshift(1, -1); // -1 is a placeholder for "..."
+    }
+    if (endPage < this.totalPages - 1) {
+      pageNumbers.push(-2, this.totalPages); // -2 is a placeholder for "..."
     }
     return pageNumbers;
   }
 
-  // MODIFIÉ : Émet l'alerte au composant parent pour qu'il ouvre la modale
   openAlertModal(alertId: number): void {
     const alert = this.alerts.find(a => a.id === alertId);
     if (alert) {
