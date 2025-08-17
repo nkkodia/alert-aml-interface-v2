@@ -5,6 +5,7 @@ import {AlertsComponent} from './alerts/alerts.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
 import {LoaderComponent} from './loader/loader.component';
 import {AlertDetailModalComponent} from './alert-detail-modal/alert-detail-modal.component';
+import {RouterOutlet} from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ import {AlertDetailModalComponent} from './alert-detail-modal/alert-detail-modal
     DashboardComponent,
     AlertDetailModalComponent,
     LoaderComponent,
+    RouterOutlet,
   ],
   styleUrls: ['./app.component.css']
 })

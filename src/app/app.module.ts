@@ -9,6 +9,8 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AlertsComponent } from './alerts/alerts.component';
 import { EmailLogsComponent } from './email-logs/email-logs.component';
 import { AlertDetailModalComponent } from './alert-detail-modal/alert-detail-modal.component';
+import {RouterModule} from '@angular/router';
+import {routes} from './app.routes';
 
 @NgModule({
   declarations: [
@@ -23,7 +25,9 @@ import { AlertDetailModalComponent } from './alert-detail-modal/alert-detail-mod
     AlertsComponent,
     DashboardComponent,
     LoaderComponent,
-    AppComponent
+    AppComponent,
+    RouterModule.forRoot(routes) // Ajoutez le module de routage
+
   ],
   providers: [],
   bootstrap: [AppComponent]
