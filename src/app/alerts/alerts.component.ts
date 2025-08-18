@@ -1,44 +1,31 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { ApiService, AmlAlert, Page } from '../api.service';
-import { Subscription } from 'rxjs';
-import { DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-alerts',
-  standalone: true, // Ajoutez standalone: true si c'est un composant autonome
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './alerts.component.html',
-  imports: [
-    DatePipe,
-    FormsModule
-  ],
   styleUrls: ['./alerts.component.css']
 })
 export class AlertsComponent implements OnInit {
   @Output() openModal = new EventEmitter<AmlAlert>();
-
   alerts: AmlAlert[] = [];
   currentFilters: any = { page: 0, size: 5, sortBy: 'dateAlerte', sortDir: 'desc' };
   currentPage: number = 0;
   totalPages: number = 1;
   totalElements: number = 0;
 
-  private alertsSubscription: Subscription | undefined;
-
-  constructor(private apiService: ApiService) { }
+  constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
     this.loadAlerts();
   }
 
-  ngOnDestroy(): void {
-    if (this.alertsSubscription) {
-      this.alertsSubscription.unsubscribe();
-    }
-  }
-
   loadAlerts(): void {
-    this.alertsSubscription = this.apiService.getAlerts(this.currentFilters).subscribe({
+    this.apiService.getAlerts(this.currentFilters).subscribe({
       next: (page: Page<AmlAlert>) => {
         this.alerts = page.content;
         this.currentPage = page.number;
@@ -51,7 +38,6 @@ export class AlertsComponent implements OnInit {
         this.currentPage = 0;
         this.totalPages = 1;
         this.totalElements = 0;
-        alert("Erreur lors du chargement des alertes. Voir la console pour plus de détails.");
       }
     });
   }
@@ -100,27 +86,21 @@ export class AlertsComponent implements OnInit {
 
   getPageNumbers(): number[] {
     const pageNumbers = [];
-    const maxPagesToShow = 5;
-    const startPage = Math.max(0, this.currentPage - Math.floor(maxPagesToShow / 2));
-    const endPage = Math.min(this.totalPages - 1, startPage + maxPagesToShow - 1);
-
-    for (let i = startPage; i <= endPage; i++) {
+    for (let i = 0; i < this.totalPages; i++) {
       pageNumbers.push(i + 1);
-    }
-
-    if (startPage > 0) {
-      pageNumbers.unshift(1, -1); // -1 is a placeholder for "..."
-    }
-    if (endPage < this.totalPages - 1) {
-      pageNumbers.push(-2, this.totalPages); // -2 is a placeholder for "..."
     }
     return pageNumbers;
   }
 
-  openAlertModal(alertId: number): void {
-    const alert = this.alerts.find(a => a.id === alertId);
-    if (alert) {
-      this.openModal.emit(alert);
-    }
+  onOpenAlertModal(alertId: number): void {
+    this.apiService.getAlertDetails(alertId).subscribe({
+      next: (alertDetails: AmlAlert) => {
+        this.openModal.emit(alertDetails);
+      },
+      error: (err) => {
+        console.error('Failed to load alert details:', err);
+        alert('Erreur lors du chargement des détails de l\'alerte.');
+      }
+    });
   }
 }

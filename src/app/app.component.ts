@@ -1,29 +1,33 @@
 import { Component, OnInit } from '@angular/core';
-import {AmlAlert, ApiService} from './api.service';
-import {EmailLogsComponent} from './email-logs/email-logs.component';
-import {AlertsComponent} from './alerts/alerts.component';
-import {DashboardComponent} from './dashboard/dashboard.component';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { ApiService, AmlAlert, Page } from './api.service';
+import { AlertsComponent } from './alerts/alerts.component';
+import { AlertDetailModalComponent } from './alert-detail-modal/alert-detail-modal.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
+import { EmailLogsComponent } from './email-logs/email-logs.component';
 import {LoaderComponent} from './loader/loader.component';
-import {AlertDetailModalComponent} from './alert-detail-modal/alert-detail-modal.component';
-import {RouterOutlet} from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.component.html',
+  standalone: true,
   imports: [
-    EmailLogsComponent,
+    CommonModule,
+    FormsModule,
     AlertsComponent,
-    DashboardComponent,
     AlertDetailModalComponent,
-    LoaderComponent,
+    DashboardComponent,
+    EmailLogsComponent,
+    LoaderComponent
   ],
+  templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
   title = 'AML Alert Dashboard';
-  activeSection: string = 'dashboard';
+  activeSection: string = 'alerts';
   isSidebarOpen: boolean = false;
-  selectedAlert: AmlAlert | null = null; // Stocke l'alerte sélectionnée pour la modale
+  selectedAlert: AmlAlert | null = null;
 
   constructor(private apiService: ApiService) {}
 
@@ -38,10 +42,24 @@ export class AppComponent implements OnInit {
   showSection(section: string): void {
     this.activeSection = section;
     this.isSidebarOpen = false;
+    this.title = this.getTitleForSection(section);
+  }
+
+  getTitleForSection(section: string): string {
+    switch (section) {
+      case 'dashboard':
+        return 'AML Alert Dashboard';
+      case 'alerts':
+        return 'Alerts Overview';
+      case 'emailLogs':
+        return 'Email Sending Logs';
+      default:
+        return 'AML Alert System';
+    }
   }
 
   triggerScan(): void {
-    if (confirm('Êtes-vous sûr de vouloir déclencher un scan manuel des entités ? Cela peut prendre un certain temps.')) {
+    if (confirm('Êtes-vous sûr de vouloir déclencher un scan manuel des entités ?')) {
       this.apiService.triggerScan().subscribe({
         next: (response) => {
           alert(`Scan déclenché avec succès : ${response}`);
@@ -59,13 +77,7 @@ export class AppComponent implements OnInit {
     this.selectedAlert = alert;
   }
 
-  // Fonction pour fermer la modale
   onCloseAlertModal(): void {
     this.selectedAlert = null;
-  }
-
-  // Fonction appelée quand une alerte est mise à jour
-  onAlertUpdated(): void {
-    // La modale se ferme et le tableau sera rechargé par le composant AlertsComponent
   }
 }
