@@ -1,97 +1,36 @@
-<div class="bg-white rounded-lg shadow overflow-hidden">
-  <div class="p-4 border-b border-gray-200 flex items-center justify-between">
-    <h3 class="font-medium text-gray-800">Recent Alerts</h3>
-    <div class="flex space-x-2">
-      <select [(ngModel)]="currentFilters.status" (change)="loadAlerts()" class="text-xs border border-gray-300 rounded px-2 py-1">
-        <option value="">All Status</option>
-        <option value="Ouverte">Open</option>
-        <option value="En cours de traitement">In Progress</option>
-        <option value="Fermée - Vrai positif">Resolved</option>
-        <option value="Fermée - Faux positif">False Positive</option>
-        <option value="Fermée - Résolu">Resolved</option>
-      </select>
-      <select [(ngModel)]="currentFilters.clientId" (change)="loadAlerts()" class="text-xs border border-gray-300 rounded px-2 py-1">
-        <option value="">All Clients</option>
-        <option value="Bijouterie">Bijouterie</option>
-        <option value="ESN">ESN</option>
-        <option value="Fringues">Fringues</option>
-      </select>
-      <button (click)="loadAlerts()" class="text-xs bg-primary text-white px-3 py-1 rounded hover:bg-secondary">
-        <i class="fas fa-filter mr-1"></i> Filter
-      </button>
-    </div>
+<!-- Pagination en bas du tableau -->
+<div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+  <div class="flex-1 flex justify-between sm:hidden">
+    <button (click)="prevPage()" [disabled]="currentPage === 0" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+      Previous
+    </button>
+    <button (click)="nextPage()" [disabled]="currentPage === totalPages - 1" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+      Next
+    </button>
   </div>
-  <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
-      <tr>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" (click)="sortBy('dateAlerte')">Date <i class="fas fa-sort text-gray-400"></i></th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" (click)="sortBy('clientCabinetName')">Client <i class="fas fa-sort text-gray-400"></i></th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Counterparty</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-      </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        @for (alert of alerts; track alert.id) {
-          <tr>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-primary">{{ alert.id }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ alert.dateAlerte | date:'medium' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ alert.clientCabinetName }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ alert.nomTiers || alert.denominationSocialeTiers || 'N/A' }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" [innerHTML]="getStatusBadgeHtml(alert.typeAlerte)"></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" [innerHTML]="getStatusBadgeHtml(alert.statutAlerte)"></td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              <button (click)="openAlertModal(alert.id)" class="text-primary hover:text-secondary mr-2">
-                <i class="fas fa-eye"></i>
-              </button>
-              <button (click)="openAlertModal(alert.id)" class="text-green-600 hover:text-green-800">
-                <i class="fas fa-edit"></i>
-              </button>
-            </td>
-          </tr>
-        } @empty {
-          <tr>
-            <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">Aucune alerte trouvée.</td>
-          </tr>
+  <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+    <div>
+      <p class="text-sm text-gray-700">
+        Showing <span class="font-medium">{{ (currentPage * currentFilters.size) + 1 }}</span> to <span class="font-medium">{{ (currentPage * currentFilters.size) + alerts.length }}</span> of <span class="font-medium">{{ totalElements }}</span> results
+      </p>
+    </div>
+    <div>
+      <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+        <button (click)="prevPage()" [disabled]="currentPage === 0" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+          <span class="sr-only">Previous</span>
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        @for (pageNum of getPageNumbers(); track pageNum) {
+          <button (click)="goToPage(pageNum - 1)" [class.bg-primary]="pageNum - 1 === currentPage" [class.text-white]="pageNum - 1 === currentPage" [class.bg-white]="pageNum - 1 !== currentPage" [class.text-gray-700]="pageNum - 1 !== currentPage" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium hover:bg-gray-50">
+            {{ pageNum }}
+          </button>
         }
-      </tbody>
-    </table>
-  </div>
-  <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-    <div class="flex-1 flex justify-between sm:hidden">
-      <button (click)="prevPage()" [disabled]="currentPage === 0" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-        Previous
-      </button>
-      <button (click)="nextPage()" [disabled]="currentPage === totalPages - 1" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-        Next
-      </button>
-    </div>
-    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-      <div>
-        <p class="text-sm text-gray-700">
-          Showing <span class="font-medium">{{ (currentPage * currentFilters.size) + 1 }}</span> to <span class="font-medium">{{ (currentPage * currentFilters.size) + alerts.length }}</span> of <span class="font-medium">{{ totalElements }}</span> results
-        </p>
-      </div>
-      <div>
-        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-          <button (click)="prevPage()" [disabled]="currentPage === 0" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-            <span class="sr-only">Previous</span>
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          @for (pageNum of getPageNumbers(); track pageNum) {
-            <button (click)="goToPage(pageNum - 1)" [class.bg-primary]="pageNum - 1 === currentPage" [class.text-white]="pageNum - 1 === currentPage" [class.bg-white]="pageNum - 1 !== currentPage" [class.text-gray-700]="pageNum - 1 !== currentPage" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium hover:bg-gray-50">
-              {{ pageNum }}
-            </button>
-          }
-          <button (click)="nextPage()" [disabled]="currentPage === totalPages - 1" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-            <span class="sr-only">Next</span>
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        </nav>
-      </div>
+        <button (click)="nextPage()" [disabled]="currentPage === totalPages - 1" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+          <span class="sr-only">Next</span>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </nav>
     </div>
   </div>
+</div>
 </div>
