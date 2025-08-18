@@ -1,5 +1,6 @@
 import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { ApiService, AmlAlert, Page } from '../api.service';
+import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -38,6 +39,7 @@ export class AlertsComponent implements OnInit {
         this.currentPage = 0;
         this.totalPages = 1;
         this.totalElements = 0;
+        alert("Erreur lors du chargement des alertes. Voir la console pour plus de détails.");
       }
     });
   }
