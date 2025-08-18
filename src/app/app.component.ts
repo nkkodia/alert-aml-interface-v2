@@ -16,7 +16,6 @@ import {RouterOutlet} from '@angular/router';
     DashboardComponent,
     AlertDetailModalComponent,
     LoaderComponent,
-    RouterOutlet, // Nécessaire pour le routage
   ],
   styleUrls: ['./app.component.css']
 })
