@@ -8,5 +8,5 @@ export const routes: Routes = [
   { path: 'alerts', component: AlertsComponent },
   { path: 'email-logs', component: EmailLogsComponent },
   { path: '', redirectTo: '/alerts', pathMatch: 'full' },
-  { path: '**', redirectTo: '/alerts' } // Rediriger vers les alertes si la route n'est pas trouvée
+  { path: '**', redirectTo: '/alerts' }
 ];
