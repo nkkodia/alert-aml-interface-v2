@@ -2,7 +2,7 @@
   <div class="p-4 border-b border-gray-200 flex items-center justify-between">
     <h3 class="font-medium text-gray-800">Recent Alerts</h3>
     <div class="flex space-x-2">
-      <select [(ngModel)]="currentFilters.status" (change)="loadAlerts()" class="text-xs border border-gray-300 rounded px-2 py-1">
+      <select [(ngModel)]="currentFilters.status" (change)="applyFiltersAndLoadAlerts()" class="text-xs border border-gray-300 rounded px-2 py-1">
         <option value="">All Status</option>
         <option value="Ouverte">Open</option>
         <option value="En cours de traitement">In Progress</option>
@@ -10,13 +10,13 @@
         <option value="Fermée - Faux positif">False Positive</option>
         <option value="Fermée - Résolu">Resolved</option>
       </select>
-      <select [(ngModel)]="currentFilters.clientId" (change)="loadAlerts()" class="text-xs border border-gray-300 rounded px-2 py-1">
+      <select [(ngModel)]="currentFilters.clientId" (change)="applyFiltersAndLoadAlerts()" class="text-xs border border-gray-300 rounded px-2 py-1">
         <option value="">All Clients</option>
         <option value="Bijouterie">Bijouterie</option>
         <option value="ESN">ESN</option>
         <option value="Fringues">Fringues</option>
       </select>
-      <button (click)="loadAlerts()" class="text-xs bg-primary text-white px-3 py-1 rounded hover:bg-secondary">
+      <button (click)="applyFiltersAndLoadAlerts()" class="text-xs bg-primary text-white px-3 py-1 rounded hover:bg-secondary">
         <i class="fas fa-filter mr-1"></i> Filter
       </button>
     </div>

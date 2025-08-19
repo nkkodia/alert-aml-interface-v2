@@ -1,6 +1,5 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import {Component, OnInit, Output, EventEmitter, ChangeDetectorRef} from '@angular/core';
 import { ApiService, AmlAlert, Page } from '../api.service';
-import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -19,21 +18,42 @@ export class AlertsComponent implements OnInit {
   totalPages: number = 1;
   totalElements: number = 0;
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.loadAlerts();
   }
 
+  // J'ai renommé la méthode et ajouté l'initialisation de la page à 0
+  // pour que la recherche commence toujours au début après avoir changé un filtre.
+  applyFiltersAndLoadAlerts(): void {
+    this.currentFilters.page = 0; // Réinitialise la page à 0 lors de l'application des filtres
+    this.loadAlerts();
+  }
+
   loadAlerts(): void {
-    this.apiService.getAlerts(this.currentFilters).subscribe({
+    // Crée une copie des filtres pour éviter de modifier l'objet d'origine
+    const filtersToSend = { ...this.currentFilters };
+
+    // Supprime les filtres vides pour ne pas les envoyer à l'API
+    if (filtersToSend.status === '') {
+      delete filtersToSend.status;
+    }
+    if (filtersToSend.clientId === '') {
+      delete filtersToSend.clientId;
+    }
+
+    this.apiService.getAlerts(filtersToSend).subscribe({
       next: (page: Page<AmlAlert>) => {
+        console.log('API Response Page:', page);
         this.alerts = page.content;
         this.currentPage = page.number;
         this.totalPages = page.totalPages;
         this.totalElements = page.totalElements;
+        this.cdr.detectChanges(); // Forcer la détection
+
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Failed to load alerts:', err);
         this.alerts = [];
         this.currentPage = 0;
@@ -86,9 +106,20 @@ export class AlertsComponent implements OnInit {
     }
   }
 
+  // --- NOUVELLE LOGIQUE DE PAGINATION AMÉLIORÉE ---
   getPageNumbers(): number[] {
-    const pageNumbers = [];
-    for (let i = 0; i < this.totalPages; i++) {
+    const pageNumbers: number[] = [];
+    const maxPagesToShow = 5; // Nombre maximum de boutons de page à afficher
+    let startPage = Math.max(0, this.currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(this.totalPages - 1, startPage + maxPagesToShow - 1);
+
+    // Si le nombre de pages affichées est inférieur à maxPagesToShow,
+    // on ajuste le début pour centrer la pagination
+    if (endPage - startPage + 1 < maxPagesToShow) {
+      startPage = Math.max(0, endPage - maxPagesToShow + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
       pageNumbers.push(i + 1);
     }
     return pageNumbers;
@@ -99,7 +130,7 @@ export class AlertsComponent implements OnInit {
       next: (alertDetails: AmlAlert) => {
         this.openModal.emit(alertDetails);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Failed to load alert details:', err);
         alert('Erreur lors du chargement des détails de l\'alerte.');
       }

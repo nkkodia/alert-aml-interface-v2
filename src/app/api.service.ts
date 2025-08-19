@@ -33,23 +33,31 @@ export interface SentEmailLog {
 
 export interface Page<T> {
   content: T[];
+  empty: boolean;
+  first: boolean;
+  last: boolean;
+  number: number;
+  numberOfElements: number;
   pageable: {
-    pageNumber: number;
-    pageSize: number;
-    sort: { empty: boolean; sorted: boolean; unsorted: boolean; };
-    offset: number;
     paged: boolean;
     unpaged: boolean;
+    pageNumber: number;
+    pageSize: number;
+    offset: number;
+    sort: {
+      empty: boolean;
+      sorted: boolean;
+      unsorted: boolean;
+    };
   };
-  last: boolean;
-  totalPages: number;
-  totalElements: number;
-  first: boolean;
   size: number;
-  number: number;
-  sort: { empty: boolean; sorted: boolean; unsorted: boolean; };
-  numberOfElements: number;
-  empty: boolean;
+  sort: {
+    empty: boolean;
+    sorted: boolean;
+    unsorted: boolean;
+  };
+  totalElements: number;
+  totalPages: number;
 }
 
 @Injectable({

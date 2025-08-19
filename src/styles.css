@@ -1,5 +1,7 @@
 @import "@fortawesome/fontawesome-free/css/all.min.css";
+/* src/styles.css */
 
+/* ... votre CSS existant ... */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
