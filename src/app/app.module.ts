@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common'; // Importez CommonModule
-import { PaginatorModule } from 'primeng/paginator'; // Importez le module
 
 import { AppComponent } from './app.component';
 import { LoaderComponent } from './loader/loader.component';
@@ -26,9 +25,7 @@ import { EmailLogsComponent } from './email-logs/email-logs.component';
     EmailLogsComponent,
     DashboardComponent,
     LoaderComponent,
-    AppComponent,
-    PaginatorModule // Ajoutez le module aux imports
-
+    AppComponent
   ],
   providers: [],
   bootstrap: [AppComponent]
