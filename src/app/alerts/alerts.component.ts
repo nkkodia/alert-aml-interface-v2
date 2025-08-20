@@ -1,7 +1,10 @@
-import {Component, OnInit, Output, EventEmitter, ChangeDetectorRef} from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { ApiService, AmlAlert, Page } from '../api.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables); // Enregistrez tous les modules Chart.js
 
 @Component({
   selector: 'app-alerts',
@@ -18,40 +21,23 @@ export class AlertsComponent implements OnInit {
   totalPages: number = 1;
   totalElements: number = 0;
 
-  constructor(private apiService: ApiService, private cdr: ChangeDetectorRef) {}
+  alertsByTypeChart: Chart | undefined;
+  alertsByStatusChart: Chart | undefined;
+
+  constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
     this.loadAlerts();
   }
 
-  // J'ai renommé la méthode et ajouté l'initialisation de la page à 0
-  // pour que la recherche commence toujours au début après avoir changé un filtre.
-  applyFiltersAndLoadAlerts(): void {
-    this.currentFilters.page = 0; // Réinitialise la page à 0 lors de l'application des filtres
-    this.loadAlerts();
-  }
-
   loadAlerts(): void {
-    // Crée une copie des filtres pour éviter de modifier l'objet d'origine
-    const filtersToSend = { ...this.currentFilters };
-
-    // Supprime les filtres vides pour ne pas les envoyer à l'API
-    if (filtersToSend.status === '') {
-      delete filtersToSend.status;
-    }
-    if (filtersToSend.clientId === '') {
-      delete filtersToSend.clientId;
-    }
-
-    this.apiService.getAlerts(filtersToSend).subscribe({
+    this.apiService.getAlerts(this.currentFilters).subscribe({
       next: (page: Page<AmlAlert>) => {
-        console.log('API Response Page:', page);
         this.alerts = page.content;
         this.currentPage = page.number;
         this.totalPages = page.totalPages;
         this.totalElements = page.totalElements;
-        this.cdr.detectChanges(); // Forcer la détection
-
+        this.updateCharts(page.content); // Mettre à jour les graphiques avec les données filtrées
       },
       error: (err: any) => {
         console.error('Failed to load alerts:', err);
@@ -59,7 +45,6 @@ export class AlertsComponent implements OnInit {
         this.currentPage = 0;
         this.totalPages = 1;
         this.totalElements = 0;
-        alert("Erreur lors du chargement des alertes. Voir la console pour plus de détails.");
       }
     });
   }
@@ -106,20 +91,9 @@ export class AlertsComponent implements OnInit {
     }
   }
 
-  // --- NOUVELLE LOGIQUE DE PAGINATION AMÉLIORÉE ---
   getPageNumbers(): number[] {
-    const pageNumbers: number[] = [];
-    const maxPagesToShow = 5; // Nombre maximum de boutons de page à afficher
-    let startPage = Math.max(0, this.currentPage - Math.floor(maxPagesToShow / 2));
-    let endPage = Math.min(this.totalPages - 1, startPage + maxPagesToShow - 1);
-
-    // Si le nombre de pages affichées est inférieur à maxPagesToShow,
-    // on ajuste le début pour centrer la pagination
-    if (endPage - startPage + 1 < maxPagesToShow) {
-      startPage = Math.max(0, endPage - maxPagesToShow + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
+    const pageNumbers = [];
+    for (let i = 0; i < this.totalPages; i++) {
       pageNumbers.push(i + 1);
     }
     return pageNumbers;
@@ -135,5 +109,76 @@ export class AlertsComponent implements OnInit {
         alert('Erreur lors du chargement des détails de l\'alerte.');
       }
     });
+  }
+
+  updateCharts(alerts: AmlAlert[]): void {
+    const typeCounts: { [key: string]: number } = {};
+    const statusCounts: { [key: string]: number } = {};
+
+    alerts.forEach(alert => {
+      typeCounts[alert.typeAlerte] = (typeCounts[alert.typeAlerte] || 0) + 1;
+      statusCounts[alert.statutAlerte] = (statusCounts[alert.statutAlerte] || 0) + 1;
+    });
+
+    const finalTypeLabels = Object.keys(typeCounts).sort();
+    const finalStatusLabels = Object.keys(statusCounts).sort();
+
+    const typeColors: { [key: string]: string } = {
+      'PaysNonCooperant': '#f97316', // Orange
+      'ListeSanctions': '#dc2626',   // Rouge
+      'RetraitEspèces': '#1e40af',   // Bleu
+      'PEP': '#8b5cf6',              // Violet
+      'Other': '#64748b'             // Gris
+    };
+    const dynamicTypeBackgroundColors = finalTypeLabels.map(label => typeColors[label] || '#64748b');
+
+    const statusColors: { [key: string]: string } = {
+      'Ouverte': '#f59e0b',
+      'En cours de traitement': '#3b82f6',
+      'Fermée - Vrai positif': '#10b981',
+      'Fermée - Faux positif': '#64748b',
+      'Fermée - Résolu': '#10b981'
+    };
+    const dynamicStatusBackgroundColors = finalStatusLabels.map(label => statusColors[label] || '#64748b');
+
+    // Mettre à jour le graphique par type
+    if (this.alertsByTypeChart) {
+      this.alertsByTypeChart.data.labels = finalTypeLabels;
+      this.alertsByTypeChart.data.datasets[0].data = finalTypeLabels.map(label => typeCounts[label]);
+      this.alertsByTypeChart.data.datasets[0].backgroundColor = dynamicTypeBackgroundColors;
+      this.alertsByTypeChart.update();
+    } else {
+      const ctx = document.getElementById('alertsByTypeChart') as HTMLCanvasElement;
+      if (ctx) {
+        this.alertsByTypeChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: finalTypeLabels,
+            datasets: [{ data: finalTypeLabels.map(label => typeCounts[label]), backgroundColor: dynamicTypeBackgroundColors, borderWidth: 0 }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+        });
+      }
+    }
+
+    // Mettre à jour le graphique par statut
+    if (this.alertsByStatusChart) {
+      this.alertsByStatusChart.data.labels = finalStatusLabels;
+      this.alertsByStatusChart.data.datasets[0].data = finalStatusLabels.map(label => statusCounts[label]);
+      this.alertsByStatusChart.data.datasets[0].backgroundColor = dynamicStatusBackgroundColors;
+      this.alertsByStatusChart.update();
+    } else {
+      const ctx = document.getElementById('alertsByStatusChart') as HTMLCanvasElement;
+      if (ctx) {
+        this.alertsByStatusChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: finalStatusLabels,
+            datasets: [{ label: 'Alerts', data: finalStatusLabels.map(label => statusCounts[label]), backgroundColor: dynamicStatusBackgroundColors, borderWidth: 0 }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+        });
+      }
+    }
   }
 }
