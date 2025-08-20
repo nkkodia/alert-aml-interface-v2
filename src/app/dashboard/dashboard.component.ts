@@ -75,9 +75,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const finalStatusLabels = Object.keys(statusCounts).sort();
 
     const typeColors: { [key: string]: string } = {
-      'Sanction': '#ef4444',
+      'ListeSanctions': '#ef4444',
       'PaysNonCooperant': '#f97316',
-      'PEP': '#8b5cf6',
+      'RetraitEspèces': '#8b5cf6',
       'Other': '#64748b'
     };
     const dynamicTypeBackgroundColors = finalTypeLabels.map(label => typeColors[label] || '#64748b');
