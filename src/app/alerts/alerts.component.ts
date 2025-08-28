@@ -16,7 +16,7 @@ Chart.register(...registerables); // Enregistrez tous les modules Chart.js
 export class AlertsComponent implements OnInit {
   @Output() openModal = new EventEmitter<AmlAlert>();
   alerts: AmlAlert[] = [];
-  currentFilters: any = { page: 0, size: 5, sortBy: 'dateAlerte', sortDir: 'desc' };
+  currentFilters: any = { page: 0, size: 5, sortBy: 'dateAlerte', sortDir: 'desc', typeAlerte: '' };
   currentPage: number = 0;
   totalPages: number = 1;
   totalElements: number = 0;
