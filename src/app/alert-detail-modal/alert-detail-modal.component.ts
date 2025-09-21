@@ -18,6 +18,8 @@ export class AlertDetailModalComponent {
   @Output() close = new EventEmitter<void>();
   @Output() alertUpdated = new EventEmitter<void>();
 
+  selectedFile: File | null = null;
+
   newComment: string = '';
   selectedStatus: string = '';
   resendRecipientEmail: string = 'admin@alertaml.com';
@@ -29,6 +31,11 @@ export class AlertDetailModalComponent {
       this.selectedStatus = this.alert.statutAlerte;
       this.newComment = ''; // Clear comment on new alert
     }
+  }
+
+  getVerificationLink(description: string): string | null {
+    const match = description.match(/Lien de vérification : (https?:\/\/[^\s]+)/);
+    return match ? match[1] : null;
   }
 
   getStatusBadgeHtml(status: string): string {
@@ -50,17 +57,20 @@ export class AlertDetailModalComponent {
     this.close.emit();
   }
 
+
   saveChanges(): void {
-    if (!this.alert || (!this.newComment && !this.selectedStatus)) {
-      alert('Veuillez ajouter un commentaire ou changer le statut.');
-      return;
+    const formData = new FormData();
+    formData.append('newStatus', this.selectedStatus);
+    formData.append('comments', this.newComment);
+    if (this.selectedFile) {
+      formData.append('pieceJointe', this.selectedFile, this.selectedFile.name);
     }
 
-    this.apiService.updateAlertStatus(this.alert.id, this.selectedStatus, this.newComment).subscribe({
+    this.apiService.updateAlertStatus(this.alert!.id, this.selectedStatus, this.newComment).subscribe({
       next: (updatedAlert) => {
         alert('Alerte mise à jour avec succès !');
-        this.alertUpdated.emit(); // Notifier le parent de la mise à jour
-        this.closeModal();
+        this.alertUpdated.emit();
+        // Remove the closeModal() call here to keep the modal open
       },
       error: (err) => {
         console.error('Failed to update alert status:', err);
@@ -76,7 +86,10 @@ export class AlertDetailModalComponent {
       return;
     }
 
-    this.apiService.resendAlertEmail(this.alert.id, this.resendRecipientEmail).subscribe({
+    const deployedBaseUrl = 'https://alert-aml-interface.netlify.app';
+    const alertUrl = `${deployedBaseUrl}/alerts/${this.alert.id}`;
+
+    this.apiService.resendAlertEmail(this.alert.id, this.resendRecipientEmail, alertUrl).subscribe({
       next: (response) => {
         alert('E-mail de renvoi : ' + response);
       },
@@ -86,6 +99,11 @@ export class AlertDetailModalComponent {
       }
     });
   }
+
+  onFileSelected(event: any): void {
+    this.selectedFile = event.target.files[0];
+  }
+
 
   getCountryFromDescription(description: string, type: string): string {
     if (type === 'PaysNonCooperant' && description) {

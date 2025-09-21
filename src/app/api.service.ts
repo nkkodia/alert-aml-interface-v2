@@ -108,11 +108,10 @@ export class ApiService {
     );
   }
 
-  resendAlertEmail(alertId: number, recipientEmail: string): Observable<string> {
-    const body = { recipientEmail };
-    return this.http.post(`${this.API_BASE_URL}/api/alerts/${alertId}/resend-email`, body, { responseType: 'text' }).pipe(
-      catchError(this.handleError)
-    );
+  // Nouvelle fonction pour renvoyer un e-mail avec l'URL de l'alerte
+  resendAlertEmail(alertId: number, recipientEmail: string, alertUrl: string): Observable<string> {
+    const body = { recipientEmail, alertUrl }; // L'URL est envoyée dans le corps de la requête
+    return this.http.post<string>(`${this.API_BASE_URL}/api/alerts/${alertId}/resend-email`, body, { responseType: 'text' as 'json' });
   }
 
   triggerScan(): Observable<string> {
