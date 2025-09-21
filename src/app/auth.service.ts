@@ -1,20 +1,22 @@
+// src/app/auth.service.ts
+
 import { Injectable } from '@angular/core';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private _credentials: string | null = null;
+  private readonly CREDENTIALS_KEY = 'authCredentials';
 
-  saveCredentials(creds: string) {
-    this._credentials = creds;
+  saveCredentials(creds: string): void {
+    localStorage.setItem(this.CREDENTIALS_KEY, creds);
   }
 
   getCredentials(): string | null {
-    return this._credentials;
+    return localStorage.getItem(this.CREDENTIALS_KEY);
   }
 
   clearCredentials(): void {
-    this._credentials = null;
+    localStorage.removeItem(this.CREDENTIALS_KEY);
   }
 }

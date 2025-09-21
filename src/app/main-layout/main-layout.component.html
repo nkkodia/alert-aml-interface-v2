@@ -10,10 +10,12 @@
       <div class="p-4">
         <div class="mb-6">
           <h2 class="text-xs uppercase font-semibold text-gray-500 mb-2">Main</h2>
+          <!-- Correct path to alerts -->
           <a routerLink="/app/alerts" routerLinkActive="bg-blue-50 text-primary" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
             <i class="fas fa-bell mr-3"></i>
             Alerts
           </a>
+          <!-- Correct path to dashboard -->
           <a routerLink="/app/dashboard" routerLinkActive="bg-blue-50 text-primary" class="flex items-center px-3 py-2 text-sm font-medium rounded-md mt-1 text-gray-700 hover:bg-gray-100">
             <i class="fas fa-tachometer-alt mr-3"></i>
             Dashboard
@@ -22,6 +24,10 @@
       </div>
     </nav>
     <div class="p-4 border-t border-gray-200">
+      <button (click)="triggerScan()" class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+        <i class="fas fa-sync-alt mr-3 text-gray-500"></i>
+        Trigger Scan
+      </button>
       <button (click)="logout()" class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
         <i class="fas fa-sign-out-alt mr-3 text-gray-500"></i>
         Déconnexion

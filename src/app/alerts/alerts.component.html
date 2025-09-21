@@ -112,3 +112,10 @@
     </ul>
   </nav>
 </div>
+@if (selectedAlert) {
+  <app-alert-detail-modal
+    [alert]="selectedAlert"
+    (close)="onCloseAlertModal()"
+    (alertUpdated)="onAlertsUpdated()"
+  ></app-alert-detail-modal>
+}

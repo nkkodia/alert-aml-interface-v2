@@ -1,28 +1,37 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ApiService, AmlAlert, Page } from '../api.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common'; // Ajout de DatePipe
 import { FormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
+import { Subscription } from 'rxjs';
+import { AlertDetailModalComponent } from '../alert-detail-modal/alert-detail-modal.component'; // Import de la modale
 
-Chart.register(...registerables); // Enregistrez tous les modules Chart.js
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-alerts',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DatePipe,
+    AlertDetailModalComponent,
+  ],
   templateUrl: './alerts.component.html',
   styleUrls: ['./alerts.component.css']
 })
 export class AlertsComponent implements OnInit {
-  @Output() openModal = new EventEmitter<AmlAlert>();
   alerts: AmlAlert[] = [];
   currentFilters: any = { page: 0, size: 5, sortBy: 'dateAlerte', sortDir: 'desc', typeAlerte: '' };
   currentPage: number = 0;
   totalPages: number = 1;
   totalElements: number = 0;
+  selectedAlert: AmlAlert | null = null; // État pour la modale
 
   alertsByTypeChart: Chart | undefined;
   alertsByStatusChart: Chart | undefined;
+
+  private alertsSubscription: Subscription | undefined;
 
   constructor(private apiService: ApiService) {}
 
@@ -37,16 +46,35 @@ export class AlertsComponent implements OnInit {
         this.currentPage = page.number;
         this.totalPages = page.totalPages;
         this.totalElements = page.totalElements;
-        this.updateCharts(page.content); // Mettre à jour les graphiques avec les données filtrées
       },
       error: (err: any) => {
         console.error('Failed to load alerts:', err);
         this.alerts = [];
-        this.currentPage = 0;
-        this.totalPages = 1;
-        this.totalElements = 0;
       }
     });
+  }
+
+  // Méthode pour ouvrir la modale en chargeant les détails de l'alerte
+  onOpenAlertModal(alertId: number): void {
+    this.apiService.getAlertDetails(alertId).subscribe({
+      next: (alertDetails: AmlAlert) => {
+        this.selectedAlert = alertDetails;
+      },
+      error: (err: any) => {
+        console.error('Failed to load alert details:', err);
+        alert('Erreur lors du chargement des détails de l\'alerte.');
+      }
+    });
+  }
+
+  // Méthode pour fermer la modale
+  onCloseAlertModal(): void {
+    this.selectedAlert = null;
+  }
+
+  // Méthode pour recharger la liste après une mise à jour de la modale
+  onAlertsUpdated(): void {
+    this.loadAlerts();
   }
 
   getStatusBadgeHtml(status: string): string {
@@ -97,88 +125,5 @@ export class AlertsComponent implements OnInit {
       pageNumbers.push(i + 1);
     }
     return pageNumbers;
-  }
-
-  onOpenAlertModal(alertId: number): void {
-    this.apiService.getAlertDetails(alertId).subscribe({
-      next: (alertDetails: AmlAlert) => {
-        this.openModal.emit(alertDetails);
-      },
-      error: (err: any) => {
-        console.error('Failed to load alert details:', err);
-        alert('Erreur lors du chargement des détails de l\'alerte.');
-      }
-    });
-  }
-
-  updateCharts(alerts: AmlAlert[]): void {
-    const typeCounts: { [key: string]: number } = {};
-    const statusCounts: { [key: string]: number } = {};
-
-    alerts.forEach(alert => {
-      typeCounts[alert.typeAlerte] = (typeCounts[alert.typeAlerte] || 0) + 1;
-      statusCounts[alert.statutAlerte] = (statusCounts[alert.statutAlerte] || 0) + 1;
-    });
-
-    const finalTypeLabels = Object.keys(typeCounts).sort();
-    const finalStatusLabels = Object.keys(statusCounts).sort();
-
-    const typeColors: { [key: string]: string } = {
-      'PaysNonCooperant': '#f97316', // Orange
-      'ListeSanctions': '#dc2626',   // Rouge
-      'RetraitEspèces': '#1e40af',   // Bleu
-      'PEP': '#8b5cf6',              // Violet
-      'Other': '#64748b'             // Gris
-    };
-    const dynamicTypeBackgroundColors = finalTypeLabels.map(label => typeColors[label] || '#64748b');
-
-    const statusColors: { [key: string]: string } = {
-      'Ouverte': '#f59e0b',
-      'En cours de traitement': '#3b82f6',
-      'Fermée - Vrai positif': '#10b981',
-      'Fermée - Faux positif': '#64748b',
-      'Fermée - Résolu': '#10b981'
-    };
-    const dynamicStatusBackgroundColors = finalStatusLabels.map(label => statusColors[label] || '#64748b');
-
-    // Mettre à jour le graphique par type
-    if (this.alertsByTypeChart) {
-      this.alertsByTypeChart.data.labels = finalTypeLabels;
-      this.alertsByTypeChart.data.datasets[0].data = finalTypeLabels.map(label => typeCounts[label]);
-      this.alertsByTypeChart.data.datasets[0].backgroundColor = dynamicTypeBackgroundColors;
-      this.alertsByTypeChart.update();
-    } else {
-      const ctx = document.getElementById('alertsByTypeChart') as HTMLCanvasElement;
-      if (ctx) {
-        this.alertsByTypeChart = new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-            labels: finalTypeLabels,
-            datasets: [{ data: finalTypeLabels.map(label => typeCounts[label]), backgroundColor: dynamicTypeBackgroundColors, borderWidth: 0 }]
-          },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-        });
-      }
-    }
-
-    // Mettre à jour le graphique par statut
-    if (this.alertsByStatusChart) {
-      this.alertsByStatusChart.data.labels = finalStatusLabels;
-      this.alertsByStatusChart.data.datasets[0].data = finalStatusLabels.map(label => statusCounts[label]);
-      this.alertsByStatusChart.data.datasets[0].backgroundColor = dynamicStatusBackgroundColors;
-      this.alertsByStatusChart.update();
-    } else {
-      const ctx = document.getElementById('alertsByStatusChart') as HTMLCanvasElement;
-      if (ctx) {
-        this.alertsByStatusChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: finalStatusLabels,
-            datasets: [{ label: 'Alerts', data: finalStatusLabels.map(label => statusCounts[label]), backgroundColor: dynamicStatusBackgroundColors, borderWidth: 0 }]
-          },
-          options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
-        });
-      }
-    }
   }
 }
