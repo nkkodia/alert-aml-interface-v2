@@ -9,6 +9,7 @@ Chart.register(...registerables); // Enregistrez tous les modules Chart.js
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
+  standalone: true, // This is the key
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit, OnDestroy {

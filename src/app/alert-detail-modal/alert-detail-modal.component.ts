@@ -6,6 +6,7 @@ import {DatePipe, NgIf} from '@angular/common';
 @Component({
   selector: 'app-alert-detail-modal',
   templateUrl: './alert-detail-modal.component.html',
+  standalone: true, // This is the key
   imports: [
     FormsModule,
     DatePipe
