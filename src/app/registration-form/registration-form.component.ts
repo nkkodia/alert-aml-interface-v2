@@ -29,21 +29,18 @@ export class RegistrationFormComponent {
 
     this.http.post(backendUrl, this.registrationRequest).subscribe({
       next: (response: any) => {
+        // La requête a réussi
         this.message = 'Inscription réussie ! Vous pouvez maintenant vous connecter.';
         this.isSuccess = true;
         this.router.navigate(['/login']);
       },
       error: (errorResponse) => {
-        // Handle a structured error response
+        // La requête a échoué
         if (errorResponse.error && errorResponse.error.message) {
+          // Si le back-end renvoie un message d'erreur
           this.message = `Erreur lors de l’inscription: ${errorResponse.error.message}`;
-        }
-        // Handle a plain text or unstructured error response
-        else if (typeof errorResponse.error === 'string') {
-          this.message = `Erreur lors de l’inscription: ${errorResponse.error}`;
-        }
-        // Fallback to a generic error message
-        else {
+        } else {
+          // Si le back-end ne renvoie pas de message d'erreur structuré
           this.message = 'Erreur lors de l’inscription. Veuillez réessayer.';
         }
         this.isSuccess = false;
@@ -51,5 +48,4 @@ export class RegistrationFormComponent {
       }
     });
   }
-
 }

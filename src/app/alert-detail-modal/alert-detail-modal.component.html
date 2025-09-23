@@ -71,15 +71,22 @@
                 <div class="mt-6">
                   <h4 class="font-medium text-gray-800 mb-2">Comments</h4>
                   <div class="space-y-3 mb-4">
+                    @if (alert.commentairesTraitement) {
+                      <div class="bg-gray-50 p-3 rounded">
+                        <div class="flex justify-between">
+                          <p class="text-sm font-medium">Historique des commentaires</p>
+                          <p class="text-xs text-gray-500">{{ alert.dateAlerte | date:'medium' }}</p>
+                        </div>
+                        <p class="text-sm mt-1">{{ alert.commentairesTraitement }}</p>
+                      </div>
+                    } @else {
+                      <p class="text-sm text-gray-500">Aucun commentaire.</p>
+                    }
                   </div>
                   <div>
                     <label for="newComment" class="block text-sm font-medium text-gray-700">Add Comment</label>
                     <div class="mt-1">
                       <textarea [(ngModel)]="newComment" name="newComment" rows="3" class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border border-gray-300 rounded-md" id="newComment"></textarea>
-                    </div>
-                    <div class="mt-4">
-                      <label for="pieceJointe" class="block text-sm font-medium text-gray-700">Pièce jointe</label>
-                      <input type="file" (change)="onFileSelected($event)" id="pieceJointe">
                     </div>
                     <div class="mt-4">
                       <label for="resendRecipientEmail" class="block text-sm font-medium text-gray-700 mb-1">Email du Destinataire pour Renvoi</label>
@@ -89,8 +96,8 @@
                         </div>
                         <input type="email" [(ngModel)]="resendRecipientEmail" name="resendRecipientEmail"
                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500
-                                                focus:outline-none focus:ring-primary focus:border-primary sm:text-sm
-                                                transition duration-150 ease-in-out"
+                                                        focus:outline-none focus:ring-primary focus:border-primary sm:text-sm
+                                                        transition duration-150 ease-in-out"
                                placeholder="saisir l'adresse email" id="resendRecipientEmail">
                       </div>
                       <p class="mt-2 text-xs text-gray-500">Ex: supportvotreentreprise.com</p>

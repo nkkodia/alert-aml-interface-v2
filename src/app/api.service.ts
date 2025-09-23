@@ -131,4 +131,8 @@ export class ApiService {
       catchError(this.handleError)
     );
   }
+  updateAlertStatusWithFile(alertId: number, formData: FormData): Observable<AmlAlert> {
+    // Use a PUT request with the FormData object
+    return this.http.put<AmlAlert>(`${this.API_BASE_URL}api/alerts/${alertId}/status`, formData);
+  }
 }

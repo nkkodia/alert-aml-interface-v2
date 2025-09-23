@@ -33,11 +33,6 @@ export class AlertDetailModalComponent {
     }
   }
 
-  getVerificationLink(description: string): string | null {
-    const match = description.match(/Lien de vérification : (https?:\/\/[^\s]+)/);
-    return match ? match[1] : null;
-  }
-
   getStatusBadgeHtml(status: string): string {
     let colorClass = 'bg-gray-100 text-gray-800';
     switch (status) {
@@ -79,6 +74,20 @@ export class AlertDetailModalComponent {
     });
   }
 
+  getVerificationLink(description: string): string | null {
+    const match = description.match(/Lien de vérification : (https?:\/\/[^\s]+)/);
+    return match ? match[1] : null;
+  }
+
+  getSourceText(description: string): string {
+    const link = this.getVerificationLink(description);
+    return link ? description.replace(new RegExp(`Lien de vérification : ${link}.?`), '') : description;
+  }
+
+  getMatchReasonText(description: string): string {
+    const link = this.getVerificationLink(description);
+    return link ? description.replace(new RegExp(`Lien de vérification : ${link}.?`), '') : description;
+  }
   resendEmail(): void {
     if (!this.alert) return;
 
