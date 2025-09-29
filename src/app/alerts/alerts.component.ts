@@ -4,7 +4,7 @@ import { CommonModule, DatePipe } from '@angular/common'; // Ajout de DatePipe
 import { FormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';
 import { Subscription } from 'rxjs';
-import { AlertDetailModalComponent } from '../alert-detail-modal/alert-detail-modal.component'; // Import de la modale
+import {Router} from '@angular/router'; // Import de la modale
 
 Chart.register(...registerables);
 
@@ -15,7 +15,6 @@ Chart.register(...registerables);
     CommonModule,
     FormsModule,
     DatePipe,
-    AlertDetailModalComponent,
   ],
   templateUrl: './alerts.component.html',
   styleUrls: ['./alerts.component.css']
@@ -33,7 +32,7 @@ export class AlertsComponent implements OnInit {
 
   private alertsSubscription: Subscription | undefined;
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService,  private router: Router) {}
 
   ngOnInit(): void {
     this.loadAlerts();
@@ -125,5 +124,9 @@ export class AlertsComponent implements OnInit {
       pageNumbers.push(i + 1);
     }
     return pageNumbers;
+  }
+  navigateToAlertDetails(alertId: number): void {
+    // Utilise le chemin défini dans le routeur : /app/alerts/:id
+    this.router.navigate(['/app/alerts', alertId]);
   }
 }

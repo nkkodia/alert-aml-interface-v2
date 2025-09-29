@@ -1,22 +1,23 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { ApiService, AmlAlert } from '../api.service';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {CommonModule, DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {DatePipe, NgIf} from '@angular/common';
+import {AmlAlert, ApiService} from '../api.service';
+import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({
-  selector: 'app-alert-detail-modal',
-  templateUrl: './alert-detail-modal.component.html',
-  standalone: true, // This is the key
-  imports: [
-    FormsModule,
-    DatePipe
-  ],
-  styleUrls: ['./alert-detail-modal.component.css']
+  selector: 'app-alert-detail-page',
+  imports: [CommonModule, FormsModule, DatePipe],
+  templateUrl: './alert-detail-page.component.html',
+  styleUrl: './alert-detail-page.component.css'
 })
-export class AlertDetailModalComponent {
-  @Input() alert: AmlAlert | null = null;
+export class AlertDetailPageComponent  implements OnInit {
+  alert: AmlAlert | null = null;
+  alertId: number | null = null;
+  loading: boolean = true;
+
   @Output() close = new EventEmitter<void>();
   @Output() alertUpdated = new EventEmitter<void>();
+  urlVerification: string = ''; // Nouvelle propriété pour l'édition de l'URL
 
   selectedFile: File | null = null;
 
@@ -24,15 +25,51 @@ export class AlertDetailModalComponent {
   selectedStatus: string = '';
   resendRecipientEmail: string = 'admin@alertaml.com';
 
-  constructor(private apiService: ApiService) { }
+  constructor(
+    private route: ActivatedRoute,
+    private apiService: ApiService,
+    private router: Router, // Injectez le Router
 
-  ngOnChanges(): void {
-    if (this.alert) {
-      this.selectedStatus = this.alert.statutAlerte;
-      this.newComment = ''; // Clear comment on new alert
-    }
+  ) {}
+
+  ngOnInit(): void {
+    // Récupère l'ID de l'URL
+    this.route.params.subscribe(params => {
+      this.alertId = +params['id']; // Le '+' convertit la chaîne en nombre
+      if (this.alertId) {
+        this.loadAlertDetails(this.alertId);
+      }
+    });
   }
 
+  isUrlEditable(): boolean {
+    if (!this.alert) {
+      return false;
+    }
+
+    // Rendre le champ éditable pour les types spécifiques où une justification externe est souvent nécessaire
+    const editableTypes = ['ListeSanctions', 'PaysNonCooperant', 'RetraitEspèces'];
+
+    // Le champ est éditable si:
+    // 1. Le type d'alerte fait partie des types définis
+    // OU
+    // 2. Une URL a déjà été enregistrée pour cette alerte (même si le type n'est pas dans la liste)
+    return editableTypes.includes(this.alert.typeAlerte) || !!this.urlVerification;
+  }
+  loadAlertDetails(id: number): void {
+    this.apiService.getAlertDetails(id).subscribe({
+      next: (alertDetails: AmlAlert) => {
+        this.alert = alertDetails;
+        this.loading = false;
+        // Initialiser les valeurs du formulaire ici
+      },
+      error: (err: any) => {
+        console.error('Échec du chargement des détails de l\'alerte:', err);
+        this.loading = false;
+        this.alert = null;
+      }
+    });
+  }
   getStatusBadgeHtml(status: string): string {
     let colorClass = 'bg-gray-100 text-gray-800';
     switch (status) {
@@ -54,21 +91,34 @@ export class AlertDetailModalComponent {
 
 
   saveChanges(): void {
-    const formData = new FormData();
-    formData.append('newStatus', this.selectedStatus);
-    formData.append('comments', this.newComment);
-    if (this.selectedFile) {
-      formData.append('pieceJointe', this.selectedFile, this.selectedFile.name);
+    if (!this.alert || (!this.newComment && !this.selectedStatus && !this.urlVerification)) {
+      alert('Veuillez ajouter un commentaire, une URL ou changer le statut.');
+      return;
     }
 
-    this.apiService.updateAlertStatus(this.alert!.id, this.selectedStatus, this.newComment).subscribe({
+    const formData = new FormData();
+    formData.append('newStatus', this.selectedStatus || this.alert.statutAlerte);
+
+    if (this.newComment) {
+      formData.append('comments', this.newComment);
+    }
+
+    // --- NOUVEAU : Inclure la nouvelle URL de vérification si elle est modifiée ---
+    if (this.urlVerification) {
+      formData.append('urlVerification', this.urlVerification);
+    }
+
+    // ... (logique pour les pièces jointes si elles sont implémentées plus tard) ...
+
+    // 3. Appel de l'API avec FormData
+    this.apiService.updateAlertStatusWithFile(this.alert!.id, formData).subscribe({
       next: (updatedAlert) => {
         alert('Alerte mise à jour avec succès !');
-        this.alertUpdated.emit();
-        // Remove the closeModal() call here to keep the modal open
+        this.loadAlertDetails(this.alert!.id);
+        this.newComment = '';
       },
       error: (err) => {
-        console.error('Failed to update alert status:', err);
+        console.error('Échec de la mise à jour de l\'alerte:', err);
         alert('Erreur lors de la mise à jour de l\'alerte.');
       }
     });
@@ -122,5 +172,10 @@ export class AlertDetailModalComponent {
       }
     }
     return 'N/A';
+  }
+
+  goBack(): void {
+    // Navigue vers la route parente (liste des alertes)
+    this.router.navigate(['/app/alerts']);
   }
 }

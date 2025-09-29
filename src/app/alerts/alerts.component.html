@@ -50,10 +50,10 @@
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" [innerHTML]="getStatusBadgeHtml(alert.typeAlerte)"></td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" [innerHTML]="getStatusBadgeHtml(alert.statutAlerte)"></td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              <button (click)="onOpenAlertModal(alert.id)" class="text-primary hover:text-secondary mr-2">
+              <button (click)="navigateToAlertDetails(alert.id)" class="text-primary hover:text-secondary mr-2">
                 <i class="fas fa-eye"></i>
               </button>
-              <button (click)="onOpenAlertModal(alert.id)" class="text-green-600 hover:text-green-800">
+              <button (click)="navigateToAlertDetails(alert.id)" class="text-green-600 hover:text-green-800">
                 <i class="fas fa-edit"></i>
               </button>
             </td>
@@ -112,10 +112,3 @@
     </ul>
   </nav>
 </div>
-@if (selectedAlert) {
-  <app-alert-detail-modal
-    [alert]="selectedAlert"
-    (close)="onCloseAlertModal()"
-    (alertUpdated)="onAlertsUpdated()"
-  ></app-alert-detail-modal>
-}

@@ -8,9 +8,9 @@ import { RegistrationFormComponent } from './registration-form/registration-form
 import { AlertsComponent } from './alerts/alerts.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { MainLayoutComponent } from './main-layout/main-layout.component';
-import {AlertDetailModalComponent} from './alert-detail-modal/alert-detail-modal.component';
 import {ChangePasswordComponent} from './change-password/change-password.component';
 import {EmailLogsComponent} from './email-logs/email-logs.component';
+import {AlertDetailPageComponent} from './alert-detail-page/alert-detail-page.component';
 
 export const routes: Routes = [
   // Redirection par défaut vers la page de connexion
@@ -25,6 +25,7 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }, // Add a default child route
       { path: 'alerts', component: AlertsComponent },
+      { path: 'alerts/:id', component: AlertDetailPageComponent },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'change-password', component: ChangePasswordComponent },
       { path: 'email-logs', component: EmailLogsComponent }, // Ajoutez la route

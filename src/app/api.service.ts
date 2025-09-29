@@ -3,6 +3,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 
+export interface CommentaireAlerte {
+  id: number;
+  texte: string;
+  nomUtilisateur: string;
+  roleUtilisateur: string;
+  dateCommentaire: string;
+  pieceJointeUrl: string | null;
+}
+
 export interface AmlAlert {
   id: number;
   tiersIdClientDb: string;
@@ -18,7 +27,10 @@ export interface AmlAlert {
   notes: string;
   gradeEnCharge: string;
   bloquant: boolean;
+  urlVerification?: string;
   commentairesTraitement: string;
+  historiqueCommentaires: CommentaireAlerte[];
+
 }
 
 export interface SentEmailLog {
@@ -133,6 +145,6 @@ export class ApiService {
   }
   updateAlertStatusWithFile(alertId: number, formData: FormData): Observable<AmlAlert> {
     // Use a PUT request with the FormData object
-    return this.http.put<AmlAlert>(`${this.API_BASE_URL}api/alerts/${alertId}/status`, formData);
+    return this.http.put<AmlAlert>(`${this.API_BASE_URL}/api/alerts/${alertId}/status`, formData);
   }
 }
