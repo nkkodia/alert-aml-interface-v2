@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService, AmlAlert, Page } from '../api.service';
+import { ApiService, AmlAlert, Page } from '../core/service/api.service';
 import { CommonModule, DatePipe } from '@angular/common'; // Ajout de DatePipe
 import { FormsModule } from '@angular/forms';
 import { Chart, registerables } from 'chart.js';

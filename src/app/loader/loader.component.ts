@@ -1,6 +1,6 @@
 // src/app/loader/loader.component.ts
 import { Component, OnInit } from '@angular/core';
-import { LoadingService } from '../loading.service';
+import { LoadingService } from '../core/service/loading.service';
 import {AsyncPipe} from '@angular/common';
 
 @Component({

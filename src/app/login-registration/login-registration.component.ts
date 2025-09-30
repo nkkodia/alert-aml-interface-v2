@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { AuthService } from '../auth.service';
+import { AuthService } from '../core/service/auth.service';
 
 @Component({
   selector: 'app-login-registration',
@@ -90,11 +90,19 @@ export class LoginRegistrationComponent {
 
     this.http.get('https://alert-aml-admin.onrender.com/api/dashboard', { headers, responseType: 'text' }).subscribe(
       (response) => {
-        if (response && response.includes('Dashboard data here')) {
-          this.authService.saveCredentials(credentials);
-          this.router.navigate(['/app/dashboard']);
+        // Sauvegarde les identifiants
+        this.authService.saveCredentials(credentials);
+
+        // --- LOGIQUE DE REDIRECTION CORRIGÉE ---
+        const redirectUrl = localStorage.getItem('redirectUrl');
+
+        if (redirectUrl) {
+          // Naviguer vers l'URL initialement demandée
+          localStorage.removeItem('redirectUrl'); // Nettoyer le stockage
+          this.router.navigateByUrl(redirectUrl);
         } else {
-          this.errorMessage = 'Identifiants incorrects. Veuillez réessayer.';
+          // Sinon, naviguer vers le tableau de bord par défaut
+          this.router.navigate(['/app/dashboard']);
         }
       },
       (error) => {

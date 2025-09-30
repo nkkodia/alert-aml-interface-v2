@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ApiService, SentEmailLog, Page } from '../api.service';
+import { ApiService, SentEmailLog, Page } from '../core/service/api.service';
 import {DatePipe} from '@angular/common';
 
 @Component({

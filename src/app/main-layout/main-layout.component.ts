@@ -3,8 +3,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {Router, RouterModule} from '@angular/router';
-import {AuthService} from '../auth.service';
-import {ApiService} from '../api.service';
+import {AuthService} from '../core/service/auth.service';
+import {ApiService} from '../core/service/api.service';
 
 @Component({
   selector: 'app-main-layout',

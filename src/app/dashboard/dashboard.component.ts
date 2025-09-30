@@ -1,6 +1,6 @@
 // src/app/dashboard/dashboard.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ApiService, AmlAlert, Page } from '../api.service';
+import { ApiService, AmlAlert, Page } from '../core/service/api.service';
 import { Chart, registerables } from 'chart.js';
 import { Subscription } from 'rxjs';
 

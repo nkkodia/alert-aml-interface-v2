@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {CommonModule, DatePipe} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {AmlAlert, ApiService} from '../api.service';
+import {AmlAlert, ApiService} from '../core/service/api.service';
 import {ActivatedRoute, Router} from '@angular/router';
 
 @Component({

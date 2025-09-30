@@ -11,6 +11,7 @@ import { MainLayoutComponent } from './main-layout/main-layout.component';
 import {ChangePasswordComponent} from './change-password/change-password.component';
 import {EmailLogsComponent} from './email-logs/email-logs.component';
 import {AlertDetailPageComponent} from './alert-detail-page/alert-detail-page.component';
+import {AuthGuard} from './core/auth.guard';
 
 export const routes: Routes = [
   // Redirection par défaut vers la page de connexion
@@ -22,6 +23,7 @@ export const routes: Routes = [
   {
     path: 'app',
     component: MainLayoutComponent,
+    canActivate: [AuthGuard], // <-- AJOUT DE LA GARDE ICI
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }, // Add a default child route
       { path: 'alerts', component: AlertsComponent },
