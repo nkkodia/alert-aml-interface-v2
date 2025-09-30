@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "build:netlify": "npm run build && cp src/_redirects dist/aml-dashboard-angular/browser",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
