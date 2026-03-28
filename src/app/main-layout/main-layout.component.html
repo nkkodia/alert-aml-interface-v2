@@ -1,0 +1,76 @@
+<div class="flex h-screen overflow-hidden">
+  <div class="sidebar bg-white w-64 border-r border-gray-200 flex flex-col">
+    <div class="p-4 border-b border-gray-200">
+      <h1 class="text-xl font-bold text-primary flex items-center">
+        <i class="fas fa-shield-alt mr-2"></i>
+        AML Alert System
+      </h1>
+    </div>
+    <nav class="flex-1 overflow-y-auto">
+      <div class="p-4">
+        <div class="mb-6">
+          <h2 class="text-xs uppercase font-semibold text-gray-500 mb-2">Main</h2>
+          <a routerLink="/app/alerts" routerLinkActive="bg-blue-50 text-primary" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+            <i class="fas fa-bell mr-3"></i>
+            Alerts
+          </a>
+          <a routerLink="/app/dashboard" routerLinkActive="bg-blue-50 text-primary" class="flex items-center px-3 py-2 text-sm font-medium rounded-md mt-1 text-gray-700 hover:bg-gray-100">
+            <i class="fas fa-tachometer-alt mr-3"></i>
+            Dashboard
+          </a>
+          <a routerLink="/app/email-logs" routerLinkActive="bg-blue-50 text-primary" class="flex items-center px-3 py-2 text-sm font-medium rounded-md mt-1 text-gray-700 hover:bg-gray-100">
+            <i class="fas fa-envelope mr-3"></i>
+            Email Logs
+          </a>
+        </div>
+        <div>
+          <h2 class="text-xs uppercase font-semibold text-gray-500 mb-2">Settings</h2>
+          <a routerLink="/app/change-password" routerLinkActive="bg-blue-50 text-primary" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+            <i class="fas fa-cog mr-3 text-gray-500"></i>
+            Change Password
+          </a>
+          <a href="#" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100 mt-1">
+            <i class="fas fa-users mr-3 text-gray-500"></i>
+            Users
+          </a>
+          <button (click)="triggerScan()" class="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100 mt-1 w-full text-left">
+            <i class="fas fa-sync-alt mr-3 text-gray-500"></i>
+            Trigger Scan
+          </button>
+        </div>
+      </div>
+    </nav>
+    <div class="p-4 border-t border-gray-200">
+      <button (click)="logout()" class="mt-4 w-full flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-100">
+        <i class="fas fa-sign-out-alt mr-3 text-gray-500"></i>
+        Déconnexion
+      </button>
+    </div>
+  </div>
+
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <header class="bg-white border-b border-gray-200 flex items-center justify-between p-4">
+      <div class="flex items-center">
+        <button class="md:hidden mr-4 text-gray-500">
+          <i class="fas fa-bars"></i>
+        </button>
+        <h2 class="text-lg font-semibold text-gray-800">AML Dashboard</h2>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="relative">
+          <button class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+        <button class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-bell"></i>
+          <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+        </button>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-4">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
